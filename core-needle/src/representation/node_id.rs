@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: MIT
 // -----------------------------------------------------------------------------
 
-use std::fmt;
 use serde::Deserialize;
+use serde::Serialize;
+use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Deserialize, Serialize)]
 pub struct NodeId(pub String);
 
 impl NodeId {

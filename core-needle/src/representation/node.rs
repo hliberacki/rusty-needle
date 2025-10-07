@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 
 use serde::Deserialize;
-use std::collections::HashMap;
 use serde_json::json;
+use std::collections::HashMap;
 
 use super::node_id::NodeId;
 
@@ -62,14 +62,17 @@ mod tests {
         }"#;
 
         let node: Node = serde_json::from_str(json).unwrap();
-        
+
         assert_eq!(node.id, Some(NodeId::new("test-id".to_string())));
         assert_eq!(node.kind, Some("note".to_string()));
         assert_eq!(node.links, vec!["link1", "link2"]);
         assert_eq!(node.links_back, vec!["back1"]);
         assert_eq!(node.title, Some("Test Title".to_string()));
         assert_eq!(node.status, Some("active".to_string()));
-        assert_eq!(node.tags, Some(vec!["tag1".to_string(), "tag2".to_string()]));
+        assert_eq!(
+            node.tags,
+            Some(vec!["tag1".to_string(), "tag2".to_string()])
+        );
         assert_eq!(node.extra["custom_field"], json!("custom_value"));
     }
 }
