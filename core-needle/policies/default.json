@@ -1,0 +1,82 @@
+{
+    "version": 1,
+    "defaults": {
+        "severity": "error",
+        "max_hops": 2
+    },
+    "rules": [
+        {
+            "rule_id": "has_outgoing",
+            "selector": {
+                "kinds": [
+                    "impl"
+                ]
+            },
+            "params": {
+                "min": 1
+            },
+            "severity": "warning",
+            "code": "IMPL_NO_LINKS",
+            "message": "Implementation has no outgoing links"
+        },
+        {
+            "rule_id": "reach_kind",
+            "selector": {
+                "kinds": [
+                    "req"
+                ]
+            },
+            "params": {
+                "target_kinds": [
+                    "test"
+                ],
+                "min": 1,
+                "max_hops": 1
+            },
+            "code": "REQ_MISSING_DIRECT_TEST",
+            "message": "Requirement must have a direct test"
+        },
+        {
+            "rule_id": "field_present",
+            "selector": {
+                "kinds": [
+                    "impl"
+                ]
+            },
+            "params": {
+                "field": "url"
+            },
+            "severity": "warning",
+            "code": "IMPL_MISSING_URL",
+            "message": "Implementation should have a repository URL"
+        },
+        {
+            "rule_id": "field_present",
+            "selector": {
+                "kinds": [
+                    "impl"
+                ]
+            },
+            "params": {
+                "field": "status"
+            },
+            "severity": "warning",
+            "code": "IMPL_LACKS_STATUS",
+            "message": "Implementation should have a status"
+        },
+        {
+            "rule_id": "external_merge",
+            "selector": {
+                "kinds": [
+                    "impl"
+                ]
+            },
+            "params": {
+                "dataset": "merges.json",
+                "rule": "author_ne_merge"
+            },
+            "code": "MERGE_BY_AUTHOR",
+            "message": "PR/MR must not be merged by its own author"
+        }
+    ]
+}
