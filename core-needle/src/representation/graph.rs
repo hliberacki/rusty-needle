@@ -8,6 +8,7 @@ use crate::representation::{
     Dataset, Issue, IssueCode, Node, NodeId, NodeKind, Severity, VersionAccessor,
 };
 use std::collections::HashMap;
+use std::fmt;
 
 // Keeping those values precalculated only to save time while fetching
 // and having those values precalculated. This might be a problem in
@@ -25,6 +26,11 @@ pub struct Graph {
     pub issues: Vec<Issue>,
 }
 
+// Views to have the printers a bit better
+pub struct GraphAdjView<'a>(&'a Graph);
+pub struct GraphIssuesView<'a>(&'a Graph);
+pub struct GraphKindsView<'a>(&'a Graph);
+
 impl Graph {
     pub fn new(view: VersionAccessor<'_>) -> Self {
         let nodes = view.needs.clone();
@@ -38,7 +44,7 @@ impl Graph {
 
         issues.extend(Self::validate_consistency(&adjacency, &reverse));
         issues.extend(Self::validate_by_kind(&nodes, &kinds));
-        issues.extend(Self::validate_dangling(&adjacency, &reverse));
+        issues.extend(Self::validate_dangling(&adjacency, &reverse, &nodes));
 
         Self {
             adjacency,
@@ -47,6 +53,16 @@ impl Graph {
             issues,
             kinds,
         }
+    }
+
+    pub fn as_adj(&self) -> GraphAdjView<'_> {
+        GraphAdjView(self)
+    }
+    pub fn as_issues(&self) -> GraphIssuesView<'_> {
+        GraphIssuesView(self)
+    }
+    pub fn as_kinds(&self) -> GraphKindsView<'_> {
+        GraphKindsView(self)
     }
 
     pub fn nodes_len(&self) -> usize {
@@ -226,9 +242,21 @@ impl Graph {
     fn validate_dangling(
         adj: &HashMap<NodeId, Vec<NodeId>>,
         rev: &HashMap<NodeId, Vec<NodeId>>,
+        nodes: &HashMap<NodeId, Node>,
     ) -> Vec<Issue> {
         let mut issues = Vec::new();
         for id in adj.keys() {
+            // Some nodes most likely would never have links e.g (NodeKind::Person | NodeKind::Team)
+            // just exclude them and continue
+            if let Some(node) = nodes.get(id) {
+                if matches!(
+                    NodeKind::from_str(node.kind.as_deref().unwrap()),
+                    NodeKind::Person | NodeKind::Team
+                ) {
+                    continue;
+                }
+            }
+
             let outs_empty = adj.get(id).map_or(true, |v| v.is_empty());
             let ins_empty = rev.get(id).map_or(true, |v| v.is_empty());
             if outs_empty && ins_empty {
@@ -240,6 +268,46 @@ impl Graph {
             }
         }
         issues
+    }
+}
+
+impl fmt::Display for Graph {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(formatter, "Graph with {} nodes:", self.nodes_len())?;
+        for (id, node) in &self.nodes {
+            writeln!(formatter, "  {id:?}: {:?}", node)?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for GraphAdjView<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(formatter, "Adjacency:")?;
+        for (node, neighbors) in &self.0.adjacency {
+            writeln!(formatter, "  {node:?} -> {neighbors:?}")?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for GraphIssuesView<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(formatter, "Issues ({}):", self.0.issues.len())?;
+        for issue in &self.0.issues {
+            writeln!(formatter, "  {:?}", issue)?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for GraphKindsView<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(formatter, "Kinds:")?;
+        for (kind, ids) in &self.0.kinds {
+            writeln!(formatter, "  {kind:?}: {:?}", ids)?;
+        }
+        Ok(())
     }
 }
 

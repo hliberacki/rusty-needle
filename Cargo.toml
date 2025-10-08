@@ -1,8 +1,5 @@
 [workspace]
-members = [
-    "core-needle"
-    #"rusty-needle"
-]
+members = ["core-needle", "rusty-needle"]
 
 [workspace.package]
 version = "0.1.0"

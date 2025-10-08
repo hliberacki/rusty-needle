@@ -13,7 +13,7 @@ pub mod node_id;
 pub mod node_kind;
 
 pub use dataset::{Dataset, VersionAccessor, VersionNode};
-pub use graph::Graph;
+pub use graph::{Graph, GraphAdjView, GraphIssuesView, GraphKindsView};
 pub use graph_data_traits::Identifiable;
 pub use issue::{Issue, IssueCode, Severity};
 pub use node::Node;

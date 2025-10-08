@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: MIT
 // -----------------------------------------------------------------------------
 
-use super::super::representation::Dataset;
+use crate::policy::Policies;
+use crate::representation::Dataset;
+use crate::representation::graph::Graph;
 use serde_json;
 use std::fs;
 use std::path::Path;
@@ -17,6 +19,24 @@ pub fn populate_from_file(path: &Path) -> std::result::Result<Dataset, Box<dyn s
 
 pub fn populate_from_str(str: &str) -> std::result::Result<Dataset, serde_json::Error> {
     let json: Dataset = serde_json::from_str(str)?;
+    Ok(json)
+}
+
+pub fn load_graph_from_file(path: &Path) -> std::result::Result<Graph, Box<dyn std::error::Error>> {
+    let loaded_dataset = populate_from_file(path)?;
+    let graph: Graph = Graph::new(loaded_dataset.access_current_version());
+    Ok(graph)
+}
+
+pub fn load_policy_from_file(
+    path: &Path,
+) -> std::result::Result<Policies, Box<dyn std::error::Error>> {
+    let raw = std::fs::read_to_string(path)?;
+    Ok(load_policy_from_str(&raw)?)
+}
+
+pub fn load_policy_from_str(str: &str) -> std::result::Result<Policies, serde_json::Error> {
+    let json: Policies = serde_json::from_str(str)?;
     Ok(json)
 }
 
@@ -85,6 +105,26 @@ mod tests {
 
         let result = populate_from_file(&temp_file);
         assert!(result.is_ok());
+
+        fs::remove_file(temp_file).unwrap();
+    }
+
+    #[test]
+    fn test_load_graph_from_file_nonexistent() {
+        let path = PathBuf::from("nonexistent_graph.json");
+        let result = load_graph_from_file(&path);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_load_graph_from_file_valid() {
+        let temp_file = std::env::temp_dir().join("test_graph.json");
+        fs::write(&temp_file, TEST_JSON).unwrap();
+
+        let result = load_graph_from_file(&temp_file);
+        assert!(result.is_ok());
+
+        let _graph = result.unwrap();
 
         fs::remove_file(temp_file).unwrap();
     }

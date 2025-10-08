@@ -6,4 +6,7 @@
 
 pub mod loader;
 
-pub use loader::{populate_from_file, populate_from_str};
+pub use loader::{
+    load_graph_from_file, load_policy_from_file, load_policy_from_str, populate_from_file,
+    populate_from_str,
+};

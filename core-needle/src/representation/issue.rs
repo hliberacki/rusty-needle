@@ -5,38 +5,88 @@
 // -----------------------------------------------------------------------------
 
 use super::node_id::NodeId;
+use std::fmt;
 use strum_macros::IntoStaticStr;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, IntoStaticStr)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, IntoStaticStr, serde::Serialize)]
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum IssueCode {
+    ImplNoLinks,
+    ReqMissingDirectTest,
+    ImplMissingUrl,
+    ImplLacksStatus,
+    PendingImpl,
+    MergeByAuthor,
     BrokenLink,
-    SelfLoop,
+    DanglingNode,
     DuplicateLink,
+    SelfLoop,
     MissingAuthor,
     MissingTeam,
-    ImplMissingUrl,
-    PendingImpl,
-    ImplLacksStatus,
     DandlingNode,
-    MergeByAuthor,
+    Unknown,
 }
 
 impl IssueCode {
-    pub fn from_rule_code(code: &str) -> IssueCode {
-        match code {
-            "IMPL_MUST_LINK_SOMETHING" => IssueCode::ImplMissingUrl,
-            "REQ_MUST_HAVE_DIRECT_TEST" => IssueCode::BrokenLink,
-            "REQ_MUST_BE_TESTABLE_TRANSITIVELY" => IssueCode::BrokenLink,
+    pub fn from_rule_code<S: AsRef<str>>(code: S) -> IssueCode {
+        let c = code.as_ref().to_ascii_uppercase();
+
+        match c.as_str() {
+            // --- Current policy codes (SCREAMING_SNAKE_CASE) ---
+            "IMPL_NO_LINKS" => IssueCode::ImplNoLinks,
+            "REQ_MISSING_DIRECT_TEST" => IssueCode::ReqMissingDirectTest,
+            "IMPL_MISSING_URL" => IssueCode::ImplMissingUrl,
+            "IMPL_LACKS_STATUS" => IssueCode::ImplLacksStatus,
+            "MERGE_BY_AUTHOR" => IssueCode::MergeByAuthor,
+
+            "BROKEN_LINK" => IssueCode::BrokenLink,
+            "DUPLICATE_LINK" => IssueCode::DuplicateLink,
+            "SELF_LOOP" => IssueCode::SelfLoop,
+            "MISSING_AUTHOR" => IssueCode::MissingAuthor,
+            "MISSING_TEAM" => IssueCode::MissingTeam,
+            "PENDING_IMPL" => IssueCode::PendingImpl,
+            "DANGLING_NODE" => IssueCode::DanglingNode,
+            "DANDLING_NODE" => IssueCode::DandlingNode,
+
+            "IMPL_MUST_LINK_SOMETHING" => IssueCode::ImplNoLinks,
+            "REQ_MUST_HAVE_DIRECT_TEST" => IssueCode::ReqMissingDirectTest,
+            "REQ_MUST_BE_TESTABLE_TRANSITIVELY" => IssueCode::ReqMissingDirectTest,
             "IMPL_URL_REQUIRED" => IssueCode::ImplMissingUrl,
             "IMPL_STATUS_REQUIRED" => IssueCode::ImplLacksStatus,
             "PR_NOT_MERGED_BY_AUTHOR" => IssueCode::MergeByAuthor,
-            _ => IssueCode::DuplicateLink,
+
+            _ => IssueCode::Unknown,
+        }
+    }
+
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            IssueCode::ImplNoLinks => "impl_no_links",
+            IssueCode::ReqMissingDirectTest => "req_missing_direct_test",
+            IssueCode::ImplMissingUrl => "impl_missing_url",
+            IssueCode::ImplLacksStatus => "impl_lacks_status",
+            IssueCode::PendingImpl => "pending_impl",
+            IssueCode::MergeByAuthor => "merge_by_author",
+            IssueCode::BrokenLink => "broken_link",
+            IssueCode::DanglingNode => "dangling_node",
+            IssueCode::DuplicateLink => "duplicate_link",
+            IssueCode::SelfLoop => "self_loop",
+            IssueCode::MissingAuthor => "missing_author",
+            IssueCode::MissingTeam => "missing_team",
+            IssueCode::DandlingNode => "dandling_node",
+            IssueCode::Unknown => "unknown",
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+impl fmt::Display for IssueCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.to_str())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Severity {
     Suggestion,
     Warning,
@@ -53,7 +103,13 @@ impl Severity {
     }
 }
 
-#[derive(Debug)]
+impl std::fmt::Display for Severity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_str())
+    }
+}
+
+#[derive(Debug, serde::Serialize)]
 pub struct Issue {
     pub severity: Severity,
     pub code: IssueCode,
