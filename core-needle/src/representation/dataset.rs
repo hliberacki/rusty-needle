@@ -28,6 +28,11 @@ impl Dataset {
             needs: &v.needs,
         }
     }
+
+    pub fn access_current_version<'a>(&'a self) -> VersionAccessor<'a> {
+        let ver = self.current_version.as_deref().expect("Empty Optional");
+        self.access_version(ver)
+    }
 }
 
 #[derive(Debug, Deserialize)]

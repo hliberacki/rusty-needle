@@ -7,7 +7,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+// TODO: use strum to cut down the boilerplate
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum NodeKind {
     Person,

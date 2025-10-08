@@ -10,7 +10,7 @@ use std::collections::HashMap;
 
 use super::node_id::NodeId;
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Debug, Deserialize, Default, Clone)]
 pub struct Node {
     pub id: Option<NodeId>,
 
@@ -24,7 +24,13 @@ pub struct Node {
     pub links_back: Vec<String>,
 
     pub title: Option<String>,
+
+    #[serde(default)]
     pub status: Option<String>,
+
+    #[serde(default)]
+    pub url: Option<String>,
+
     pub tags: Option<Vec<String>>,
 
     #[serde(flatten)]
