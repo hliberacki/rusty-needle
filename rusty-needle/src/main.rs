@@ -6,9 +6,8 @@
 
 pub mod cli_printers;
 
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
-use anyhow::{bail, Context, Result};
 use clap::Parser;
 
 use core_needle::io::{load_graph_from_file, load_policy_from_file};
