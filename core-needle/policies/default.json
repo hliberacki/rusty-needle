@@ -46,8 +46,8 @@
             "params": {
                 "field": "url"
             },
-            "severity": "warning",
-            "code": "IMPL_MISSING_URL",
+            "severity": "error",
+            "code": "IMPL_URL_REQUIRED",
             "message": "Implementation should have a repository URL"
         },
         {

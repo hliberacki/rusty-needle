@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------------
+// Copyright (c) 2025 Hubert Liberacki <hliberacki@gmail.com>
+//
+// SPDX-License-Identifier: MIT
+// -----------------------------------------------------------------------------
+
 pub mod cli_printers;
 
 use std::{fs, path::PathBuf};

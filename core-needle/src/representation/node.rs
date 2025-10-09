@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: MIT
 // -----------------------------------------------------------------------------
 
+use super::node_id::NodeId;
 use serde::Deserialize;
+use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
-
-use super::node_id::NodeId;
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct Node {
@@ -35,6 +35,51 @@ pub struct Node {
 
     #[serde(flatten)]
     pub extra: HashMap<String, serde_json::Value>,
+}
+
+impl Node {
+    // This boilerplate is LLM generate but the whole point is to match policy rule
+    // with the specified field - so that we can check for example is the field is
+    // defined in a given Node
+    pub fn field_present(&self, key: &str) -> bool {
+        match key {
+            "id" => self.id.is_some(),
+            "type" | "kind" => self
+                .kind
+                .as_deref()
+                .map(|s| !s.trim().is_empty())
+                .unwrap_or(false),
+            "title" => self
+                .title
+                .as_deref()
+                .map(|s| !s.trim().is_empty())
+                .unwrap_or(false),
+            "status" => self
+                .status
+                .as_deref()
+                .map(|s| !s.trim().is_empty())
+                .unwrap_or(false),
+            "url" => self
+                .url
+                .as_deref()
+                .map(|s| !s.trim().is_empty())
+                .unwrap_or(false),
+            "tags" => self.tags.as_ref().map(|v| !v.is_empty()).unwrap_or(false),
+            "links" => !self.links.is_empty(),
+            "links_back" => !self.links_back.is_empty(),
+            other => self.extra.get(other).map_or(false, json_value_present),
+        }
+    }
+}
+
+fn json_value_present(v: &Value) -> bool {
+    match v {
+        Value::Null => false,
+        Value::String(s) => !s.trim().is_empty(),
+        Value::Array(a) => !a.is_empty(),
+        Value::Object(o) => !o.is_empty(),
+        Value::Bool(_) | Value::Number(_) => true,
+    }
 }
 
 #[cfg(test)]

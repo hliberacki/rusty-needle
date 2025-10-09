@@ -32,7 +32,6 @@ impl IssueCode {
         let c = code.as_ref().to_ascii_uppercase();
 
         match c.as_str() {
-            // --- Current policy codes (SCREAMING_SNAKE_CASE) ---
             "IMPL_NO_LINKS" => IssueCode::ImplNoLinks,
             "REQ_MISSING_DIRECT_TEST" => IssueCode::ReqMissingDirectTest,
             "IMPL_MISSING_URL" => IssueCode::ImplMissingUrl,
